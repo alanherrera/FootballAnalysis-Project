@@ -40,3 +40,6 @@ jobs:
 
                 # Run inference
                 python yolo_inference.py > inference.log 2>&1
+
+                # copy file back to usr folder
+                sudo cp runs/detect/predict/08fd33_4.avi /usr/
