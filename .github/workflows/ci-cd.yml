@@ -17,9 +17,6 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
     - name: Deploy & Run on Fedora VM
       uses: appleboy/ssh-action@v1.0.0
       with:
@@ -28,8 +25,18 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 2222
         script: |
-          cd /opt/ml-project
-          git pull origin main
-          source venv/bin/activate
-          pip install -r requirements.txt
-          python yolo_inference.py
+                set -e
+                cd /opt/ml-project
+
+                # Fix Git safe directory
+                git config --global --add safe.directory /opt/ml-project
+                git pull origin main
+
+                # Activate venv
+                source venv/bin/activate
+
+                # Install new dependencies if any
+                pip check >/dev/null 2>&1 || pip install -r requirements.txt
+
+                # Run inference
+                python yolo_inference.py > inference.log 2>&1
